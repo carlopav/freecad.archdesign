@@ -32,30 +32,29 @@ import DraftVecUtils
 import DraftGeomUtils
 import draftutils.utils as utils
 
-from archobjects.base import ShapeGroup
-from ArchIFC import IfcProduct
+from freecad.archdesign.objects.base import Component
 
 if App.GuiUp:
     import FreeCADGui as Gui
     from PySide import QtCore, QtGui
 
 
-class Wall(ShapeGroup, IfcProduct):
+class Wall(Component):
     """
     A prototype for a new wall object for the Arch Workbench
     """
     def __init__(self, obj=None):
         super(Wall, self).__init__(obj)
-        # print("running wall object init method\n")
+        print("running wall object init method\n")
         if obj:
-            # print("running obj init method")
+            print("running obj init method")
 
             obj.Proxy = self
             self.Object = obj
             self.attach(obj)
             self.execute(obj)
 
-        self.Type = 'Arch_Wall'
+        self.Type = 'ArchDesign_Wall'
 
         self.obj_gui_tools = None
         if App.GuiUp:
@@ -63,133 +62,135 @@ class Wall(ShapeGroup, IfcProduct):
 
 
     def attach(self, obj):
-        ShapeGroup.attach(self, obj)
+        print("Running wall attach \n")
+        Component.attach(self, obj)
         self.set_properties(obj)
 
 
     def set_properties(self, obj):
         """ Setup object properties.
         """
+        print("Running wall set properties \n")
+        existing_properties = obj.PropertiesList
+        
         # Ifc Properties ----------------------------------------------------
-        IfcProduct.setProperties(self, obj)
         obj.IfcType = "Wall"
         obj.PredefinedType = "STANDARD"
 
-        # BASE Properties ---------------------------------------------------
-        _tip = 'Link to the material object.'
-        obj.addProperty('App::PropertyLink', 'Material',
-                        'Base', _tip)
-
-        # COMPONENTS Properties (partially implemented at the moment) ---------
-        _tip = 'Optional objects to use as base geometry for the wall shape'
-        obj.addProperty('App::PropertyLinkListChild', 'BaseGeometry',
-                        'Components', _tip) # TODO: better PropertyLinkListGlobal or PropertyLinkListChild?
-        
-        _tip = 'List of objects to include in a compound with the base wall shape'
-        obj.addProperty('App::PropertyLinkListChild', 'Additions',
-                        'Components', _tip) # TODO: better PropertyLinkListGlobal or PropertyLinkListChild?
-        
-        _tip = 'List of objects to subtract from the wall shape'
-        obj.addProperty('App::PropertyLinkListGlobal', 'Subtractions',
-                        'Components', _tip)
-
-        _tip = 'List of Openings inserted into the wall.\n'\
-               'Openings have to be grouped into the wall object.'
-        obj.addProperty('App::PropertyLinkListGlobal', 'Openings',
-                        'Components', _tip)
+        # COMPONENTS Properties ---------
+        if not 'Openings' in existing_properties:
+            _tip = 'List of Openings inserted into the wall.\n'\
+                'Openings have to be grouped into the wall object.'
+            obj.addProperty('App::PropertyLinkListGlobal', 'Openings',
+                            'Components', _tip)
 
         # GEOMETRY Properties -----------------------------------------------
-        _tip = 'Define the X coordinate of the start point of the core axis.\n'
-        obj.addProperty('App::PropertyDistance', 'AxisFirstPointX', #change to BaselineStart
-                        'Geometry', _tip).AxisFirstPointX = 0.0
+        if not 'AxisFirstPointX' in existing_properties:
+            _tip = 'Define the X coordinate of the start point of the core axis.\n'
+            obj.addProperty('App::PropertyDistance', 'AxisFirstPointX', #change to BaselineStart
+                            'Geometry', _tip).AxisFirstPointX = 0.0
 
-        _tip = 'Define the X coordinate of the end point of the core axis.\n'
-        obj.addProperty('App::PropertyDistance', 'AxisLastPointX', #change to BaselineEnd
-                        'Geometry', _tip).AxisLastPointX = 4000.0
+        if not 'AxisLastPointX' in existing_properties:
+            _tip = 'Define the X coordinate of the end point of the core axis.\n'
+            obj.addProperty('App::PropertyDistance', 'AxisLastPointX', #change to BaselineEnd
+                            'Geometry', _tip).AxisLastPointX = 4000.0
 
-        _tip = 'Link to an edge subobject to bind the wall axis\n'\
-               'Not implemented yet' # TODO: implement external axis binding
-        obj.addProperty('App::PropertyLinkSubGlobal', 'AxisLink',
-                        'Geometry', _tip)
+        if not 'Length' in existing_properties:
+            obj.addProperty('App::PropertyLength', 'Length',
+                            'Geometry', 'Wall length',1).Length = '4 m'
 
-        obj.addProperty('App::PropertyLength', 'Length',
-                        'Geometry', 'Wall length',1).Length = '4 m'
+        if not 'Width' in existing_properties:
+            obj.addProperty('App::PropertyLength', 'Width',
+                            'Geometry', 'Wall width').Width = '35 cm'
 
-        obj.addProperty('App::PropertyLength', 'Width',
-                        'Geometry', 'Wall width').Width = '35 cm'
-
-        obj.addProperty('App::PropertyLength', 'Height',
-                        'Geometry', 'Wall height').Height = '2.7 m'
+        if not 'Height' in existing_properties:
+            obj.addProperty('App::PropertyLength', 'Height',
+                            'Geometry', 'Wall height').Height = '2.7 m'
 
         # LEVEL Properties (not implemented yet) ----------------------------
-        _tip = 'Constrain the wall base to the parent level (Not implemented yet).'
-        obj.addProperty('App::PropertyBool', 'BaseConstrain', 
-                        'Level properties', 
-                        _tip).BaseConstrain = True
+        if not 'BaseConstrain' in existing_properties:
+            _tip = 'Constrain the wall base to the parent level (Not implemented yet).'
+            obj.addProperty('App::PropertyBool', 'BaseConstrain', 
+                            'Level properties', 
+                            _tip).BaseConstrain = True
 
-        _tip = 'If the wall base is constrained to the parent level,\
-                set Z offset (Not implemented yet).'
-        obj.addProperty('App::PropertyLength', 'BaseOffset', 
-                        'Level properties', 
-                        _tip).BaseOffset = '0'
+        if not 'BaseOffset' in existing_properties:
+            _tip = 'If the wall base is constrained to the parent level,\
+                    set Z offset (Not implemented yet).'
+            obj.addProperty('App::PropertyLength', 'BaseOffset', 
+                            'Level properties', 
+                            _tip).BaseOffset = '0'
 
-        _tip = 'Constrain the wall top to the upper level (Not implemented yet).'
-        obj.addProperty('App::PropertyBool', 'TopConstrain', 
-                        'Level properties', 
-                        _tip).TopConstrain = True
+        if not 'TopConstrain' in existing_properties:
+            _tip = 'Constrain the wall top to the upper level (Not implemented yet).'
+            obj.addProperty('App::PropertyBool', 'TopConstrain', 
+                            'Level properties', 
+                            _tip).TopConstrain = True
 
-        _tip = 'If the wall top is constrained to the parent level,\
-                set Z offset (Not implemented yet).'
-        obj.addProperty('App::PropertyLength', 'TopOffset', 
-                        'Level properties', 
-                        _tip).TopOffset = '0'
+        if not 'TopOffset' in existing_properties:
+            _tip = 'If the wall top is constrained to the parent level,\
+                    set Z offset (Not implemented yet).'
+            obj.addProperty('App::PropertyLength', 'TopOffset', 
+                            'Level properties', 
+                            _tip).TopOffset = '0'
 
         # WALL CONNECTIONS Properties ---------------------------------------
-        _tip = "Allow automatic compute of first end"
-        obj.addProperty('App::PropertyBool', 'JoinFirstEnd',# TODO: Transform to AutoJoinFirstEnd
-                        'Wall connections', _tip).JoinFirstEnd = True
+        if not 'JoinFirstEnd' in existing_properties:
+            _tip = "Allow automatic compute of first end"
+            obj.addProperty('App::PropertyBool', 'JoinFirstEnd',# TODO: Transform to AutoJoinFirstEnd
+                            'Wall connections', _tip).JoinFirstEnd = True
 
-        _tip = "Allow automatic compute of last end"
-        obj.addProperty('App::PropertyBool', 'JoinLastEnd',# TODO: Transform to AutoJoinLastEnd
-                        'Wall connections', _tip).JoinLastEnd = True
+        if not 'JoinLastEnd' in existing_properties:
+            _tip = "Allow automatic compute of last end"
+            obj.addProperty('App::PropertyBool', 'JoinLastEnd',# TODO: Transform to AutoJoinLastEnd
+                            'Wall connections', _tip).JoinLastEnd = True
 
-        _tip = "Names of the objects that target current wall"
-        obj.addProperty('App::PropertyStringList', 'IncomingTJoins',
-                        'Wall connections', _tip).IncomingTJoins = []
+        if not 'IncomingTJoins' in existing_properties:
+            _tip = "Names of the objects that target current wall"
+            obj.addProperty('App::PropertyStringList', 'IncomingTJoins',
+                            'Wall connections', _tip).IncomingTJoins = []
 
-        _tip = "Name of the object to join wall's first end"
-        obj.addProperty('App::PropertyString', 'JoinFirstEndTo',
-                        'Wall connections', _tip).JoinFirstEndTo = ''
+        if not 'JoinFirstEndTo' in existing_properties:
+            _tip = "Name of the object to join wall's first end"
+            obj.addProperty('App::PropertyString', 'JoinFirstEndTo',
+                            'Wall connections', _tip).JoinFirstEndTo = ''
 
-        _tip = "Name of the object to join wall's last end"
-        obj.addProperty('App::PropertyString', 'JoinLastEndTo',
-                        'Wall connections', _tip).JoinLastEndTo = ''
+        if not 'JoinLastEndTo' in existing_properties:
+            _tip = "Name of the object to join wall's last end"
+            obj.addProperty('App::PropertyString', 'JoinLastEndTo',
+                            'Wall connections', _tip).JoinLastEndTo = ''
 
         # WALL ENDS Properties ---------------------------------------------- 
         # All the angle properties are meant to be hidden and showed just on user demand
-        _tip = 'Angular cut of first wall end core inner half'
-        obj.addProperty('App::PropertyAngle', 'FirstCoreInnerAngle', 
-                        'Wall Ends', _tip, 4).FirstCoreInnerAngle = '90 deg'
-        
-        _tip = 'Angular cut of first wall end core outer half'
-        obj.addProperty('App::PropertyAngle', 'FirstCoreOuterAngle', 
-                        'Wall Ends', _tip, 4).FirstCoreOuterAngle = '90 deg'
+        if not 'FirstCoreInnerAngle' in existing_properties:
+            _tip = 'Angular cut of first wall end core inner half'
+            obj.addProperty('App::PropertyAngle', 'FirstCoreInnerAngle', 
+                            'Wall Ends', _tip, 4).FirstCoreInnerAngle = '90 deg'
 
-        _tip = 'First core axis endline offset'
-        obj.addProperty('App::PropertyDistance', 'FirstCoreOffset', 
-                        'Wall Ends', _tip, 4).FirstCoreOffset = 0.0
+        if not 'FirstCoreOuterAngle' in existing_properties:
+            _tip = 'Angular cut of first wall end core outer half'
+            obj.addProperty('App::PropertyAngle', 'FirstCoreOuterAngle', 
+                            'Wall Ends', _tip, 4).FirstCoreOuterAngle = '90 deg'
 
-        _tip = 'Angular cut of first wall end inner layer (to be implemented)'
-        obj.addProperty('App::PropertyAngle', 'LastCoreInnerAngle',
-                        'Wall Ends', _tip, 4).LastCoreInnerAngle = '90 deg'
+        if not 'FirstCoreOffset' in existing_properties:
+            _tip = 'First core axis endline offset'
+            obj.addProperty('App::PropertyDistance', 'FirstCoreOffset', 
+                            'Wall Ends', _tip, 4).FirstCoreOffset = 0.0
 
-        _tip = 'Angular cut of first wall end outer layer (to be implemented)'
-        obj.addProperty('App::PropertyAngle', 'LastCoreOuterAngle', 
-                        'Wall Ends', _tip, 4).LastCoreOuterAngle = '90 deg'
-        
-        _tip = 'Last core axis endline offset'
-        obj.addProperty('App::PropertyDistance', 'LastCoreOffset', 
-                        'Wall Ends', _tip, 4).LastCoreOffset = 0.0
+        if not 'LastCoreInnerAngle' in existing_properties:
+            _tip = 'Angular cut of first wall end inner layer (to be implemented)'
+            obj.addProperty('App::PropertyAngle', 'LastCoreInnerAngle',
+                            'Wall Ends', _tip, 4).LastCoreInnerAngle = '90 deg'
+
+        if not 'LastCoreOuterAngle' in existing_properties:
+            _tip = 'Angular cut of first wall end outer layer (to be implemented)'
+            obj.addProperty('App::PropertyAngle', 'LastCoreOuterAngle', 
+                            'Wall Ends', _tip, 4).LastCoreOuterAngle = '90 deg'
+
+        if not 'LastCoreOffset' in existing_properties:
+            _tip = 'Last core axis endline offset'
+            obj.addProperty('App::PropertyDistance', 'LastCoreOffset', 
+                            'Wall Ends', _tip, 4).LastCoreOffset = 0.0
         
 
     def onBeforeChange(self, obj, prop):
@@ -560,13 +561,13 @@ class Wall(ShapeGroup, IfcProduct):
 
     def is_wall_joinable(self, obj):
         """
-        Returns True if the given object type is 'Arch_Wall' and if its
-        BaseGeometry is an 'Arch_WallSegment' object.
+        Returns True if the given object type is 'ArchDesign_Wall' and if its
+        BaseGeometry is an 'ArchDesign_WallSegment' object.
         in every other case returns False.
         """
 
-        if Draft.get_type(obj) != "Arch_Wall":
-            print("Wall " + obj.Name + "is not a valid Arch_Wall objects")
+        if Draft.get_type(obj) != "ArchDesign_Wall":
+            print("Wall " + obj.Name + "is not a valid ArchDesign_Wall objects")
             return False
         if obj.BaseGeometry != []:
             print("Wall Joining only works if base geometry is not set")
@@ -1054,7 +1055,7 @@ class Wall(ShapeGroup, IfcProduct):
     def onDocumentRestored(self, obj):
         self.Object = obj
         # obj.Proxy.Type needs to be re-setted every time the document is opened.
-        obj.Proxy.Type = "Arch_Wall"
+        obj.Proxy.Type = "ArchDesign_Wall"
         
         self.obj_gui_tools = None
         if App.GuiUp:

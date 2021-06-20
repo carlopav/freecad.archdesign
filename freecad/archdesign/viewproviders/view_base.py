@@ -50,7 +50,7 @@ class ViewProviderShapeGroup(object):
             self.ViewObject = None
 
     def attach(self,vobj):
-        vobj.addExtension('Gui::ViewProviderGeoFeatureGroupExtensionPython', None)
+        vobj.addExtension('Gui::ViewProviderGeoFeatureGroupExtensionPython')
         self.ViewObject = vobj
         self.setupShapeGroup()
 
@@ -130,7 +130,7 @@ class ViewProviderShapeGroup(object):
             return True
 
         msgBox = QtGui.QMessageBox()
-        msgBox.setText("Deleting wall object " + vobj.Object.Label + ".")
+        msgBox.setText("Deleting object " + vobj.Object.Label + ".")
         msgBox.setInformativeText("Do you want to delete also contained objects?")
         msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
         msgBox.setDefaultButton(QtGui.QMessageBox.Yes)
@@ -158,5 +158,13 @@ class ViewProviderShapeGroup(object):
     def __getstate__(self):
         return None
 
+
     def __setstate__(self, _state):
         return None
+
+
+
+class ViewProviderProduct(ViewProviderShapeGroup):
+    """
+    A ViewProvider for the Product object, derived from ViewProviderShapeGroup
+    """

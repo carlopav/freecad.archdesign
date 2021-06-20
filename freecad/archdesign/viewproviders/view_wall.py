@@ -31,10 +31,10 @@ import FreeCAD as App
 
 import Part
 
-from freecad.archdesign.viewproviders.view_base import ViewProviderShapeGroup
+from freecad.archdesign.viewproviders.view_base import ViewProviderProduct
 
 
-class ViewProviderWall(ViewProviderShapeGroup):
+class ViewProviderWall(ViewProviderProduct):
     
     def __init__(self, vobj=None):
         super(ViewProviderWall, self).__init__(vobj)

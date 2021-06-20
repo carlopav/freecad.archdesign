@@ -27,12 +27,11 @@ import FreeCAD as App
 
 import DraftVecUtils
 
-from freecad.archdesign.objects.base import ShapeGroup
-from ArchIFC import IfcProduct
+from freecad.archdesign.objects.base import Component
 
 import freecad.archdesign.objects.preset_windows as window_presets
 
-class Opening(ShapeGroup, IfcProduct):
+class Opening(Component):
     def __init__(self, obj=None):
         super(Opening, self).__init__(obj)
         self.Object = obj
@@ -41,7 +40,7 @@ class Opening(ShapeGroup, IfcProduct):
 
 
     def attach(self, obj):
-        ShapeGroup.attach(self, obj)
+        Component.attach(self, obj)
         self.set_properties(obj)
    
 
@@ -79,7 +78,6 @@ class Opening(ShapeGroup, IfcProduct):
         """
     
         # Ifc Properties ----------------------------------------------------
-        IfcProduct.setProperties(self, obj)
         obj.IfcType = "Opening Element"
 
         # COMPONENTS - ADDITIONS (not implemented yet) ----------------------------

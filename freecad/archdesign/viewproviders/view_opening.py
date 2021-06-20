@@ -24,10 +24,10 @@
 # \brief Provide the viewprovider code for Arch Opening.
 
 import os
-from freecad.archdesign.viewproviders.view_base import ViewProviderShapeGroup
+from freecad.archdesign.viewproviders.view_base import ViewProviderProduct
 
 
-class ViewProviderOpening(ViewProviderShapeGroup):
+class ViewProviderOpening(ViewProviderProduct):
     
     def __init__(self, vobj=None):
         super(ViewProviderOpening, self).__init__(vobj)
