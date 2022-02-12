@@ -27,8 +27,6 @@ from pivy import coin
 import FreeCAD as App
 import FreeCADGui as Gui
 
-import Part
-
 
 class ViewProviderShapeGroup(object):
     """
@@ -74,6 +72,7 @@ class ViewProviderShapeGroup(object):
         return "Flat Lines"
 
     def getDetailPath(self,subname,path,append):
+        import Part
         if not subname or not getattr(self, 'group_node', None):
             raise NotImplementedError
         subs = Part.splitSubname(subname)

@@ -27,7 +27,6 @@ import math
 
 import FreeCAD as App
 
-import Draft
 import DraftVecUtils
 import DraftGeomUtils
 import draftutils.utils as utils
@@ -394,6 +393,8 @@ class Wall(Component):
                     <--> first_splay                <--> last_splay
         """
         import Part
+        import Draft
+
 
         if not hasattr(obj,"AxisFirstPointX") or not hasattr(obj,"AxisLastPointX") \
             or not hasattr(obj,"Width") or not hasattr(obj,"Height"):
@@ -565,6 +566,8 @@ class Wall(Component):
         BaseGeometry is an 'ArchDesign_WallSegment' object.
         in every other case returns False.
         """
+        import Draft
+
 
         if Draft.get_type(obj) != "ArchDesign_Wall":
             print("Wall " + obj.Name + "is not a valid ArchDesign_Wall objects")

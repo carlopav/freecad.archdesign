@@ -31,8 +31,6 @@ from pivy import coin
 import FreeCAD as App
 import FreeCADGui as Gui
 
-import Part
-import Draft
 
 import DraftVecUtils
 

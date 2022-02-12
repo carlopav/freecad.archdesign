@@ -29,8 +29,6 @@ from pivy import coin
 
 import FreeCAD as App
 
-import Part
-
 from freecad.archdesign.viewproviders.view_base import ViewProviderProduct
 
 
